@@ -2,13 +2,22 @@
 type: integration
 id: jira
 title: Jira Cloud
-description: How the personal projects reach Jira. The REST API carries dashboard reads and writes; the Atlassian MCP carries agent sessions.
+description: Jira as Jay's todo backend and tracker for work outside the pathccm org, and how the personal projects reach it over REST and MCP.
 owners: [human:jay.shaffer]
-tags: [jira, atlassian, mcp]
+tags: [jira, atlassian, mcp, todos]
 generated:
   by: human:jay.shaffer
   at: 2026-10-12
 ---
+
+## What it's for
+
+Jira is Jay's personal work tracker, not only a team ticketing system.
+
+- **Todo backend:** personal todos are Jira issues in [JT](../pointers/jira-jt.md). commandcenter's Todos column is a front end over them, and there is no separate todo store.
+- **Tracker for work outside pathccm:** side projects and experiments under jayshafferpath (see [projects](../projects/index.md)) are tracked in Jira as well, even though their code doesn't live in the pathccm org. Their tickets are what commandcenter's agents pick up and work.
+
+## Access paths
 
 There are two paths, and they authenticate separately.
 

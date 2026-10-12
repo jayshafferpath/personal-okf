@@ -27,6 +27,7 @@ from __future__ import annotations
 import argparse
 import subprocess
 import sys
+from datetime import date
 from pathlib import Path
 
 from okf_frontmatter import (
@@ -81,8 +82,13 @@ def _is_process_generated(fm: dict | None) -> bool:
     return isinstance(by, str) and by.startswith("process:")
 
 
-def check_file(path: Path, root: Path) -> str | None:
+def _is_dated(stamp: str, today: date) -> bool:
+    return stamp[:10] == today.isoformat()
+
+
+def check_file(path: Path, root: Path, today: date | None = None) -> str | None:
     """Return a warning string for this file, or None if nothing to flag."""
+    today = today or date.today()
     rel = path.relative_to(root)
 
     head_text = _git(root, "show", f"HEAD:{rel.as_posix()}")
@@ -120,7 +126,9 @@ def check_file(path: Path, root: Path) -> str | None:
         # Malformed/missing `generated.at` is Layer 1/2's job to fail on.
         return None
 
-    if before == after:
+    # A stamp already dated today is current. Without this, a same-day re-edit
+    # of a bare-date stamp has no fix and the Stop hook loops on the warning.
+    if before == after and not _is_dated(after, today):
         return (
             f"{rel}: body changed but generated.at is still {after!r} — "
             f"bump generated.at (OKF.md §1: it records when the content last "
@@ -131,7 +139,7 @@ def check_file(path: Path, root: Path) -> str | None:
     return None
 
 
-def check(root: Path, only: list[Path] | None = None) -> int:
+def check(root: Path, today: date, only: list[Path] | None = None) -> int:
     if _git(root, "rev-parse", "--is-inside-work-tree") is None:
         print("generated.at freshness (warn-only): skipped (not a git repo)")
         return 0
@@ -139,7 +147,7 @@ def check(root: Path, only: list[Path] | None = None) -> int:
     paths = only if only is not None else iter_markdown_files(root)
     warnings: list[str] = []
     for path in paths:
-        w = check_file(path, root)
+        w = check_file(path, root, today)
         if w is not None:
             warnings.append(w)
 
@@ -169,7 +177,9 @@ if __name__ == "__main__":
     ap.add_argument("root", nargs="?", default=".")
     ap.add_argument("--changed", nargs="*", default=None,
                     help="check only these paths (still relative to root)")
+    ap.add_argument("--today", help="reference date YYYY-MM-DD (default: system today)")
     args = ap.parse_args()
     root = Path(args.root).resolve()
+    today = date.fromisoformat(args.today) if args.today else date.today()
     only = _resolve_targets(root, args.changed) if args.changed is not None else None
-    sys.exit(check(root, only=only))
+    sys.exit(check(root, today, only=only))

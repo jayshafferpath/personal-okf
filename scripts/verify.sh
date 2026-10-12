@@ -23,6 +23,7 @@ FRESH_ARGS=("$ROOT")
 if [[ -n "$TODAY" ]]; then
   FRESH_ARGS+=("--today" "$TODAY")
 fi
+GEN_AT_ARGS=("${FRESH_ARGS[@]}")
 
 # Fail once, clearly, rather than letting all five layers each emit the same
 # import error. PyYAML is required for OKF 0.2's nested frontmatter (`generated`
@@ -64,7 +65,7 @@ if [[ "${1:-}" == "--changed" ]]; then
     "$PY" "$SCRIPTS/lint_extensions.py" "$ROOT" --changed "$@" || status=1
   echo
   run "Layer 7: generated.at freshness on edit (changed, warn-only)" \
-    "$PY" "$SCRIPTS/check_generated_at.py" "$ROOT" --changed "$@"
+    "$PY" "$SCRIPTS/check_generated_at.py" "${GEN_AT_ARGS[@]}" --changed "$@"
   echo
   if [[ $status -ne 0 ]]; then
     echo "verify (changed): FAIL"
@@ -92,7 +93,7 @@ echo
 run "Layer 6: index coverage" "$PY" "$SCRIPTS/check_index_coverage.py" "$ROOT" || status=1
 echo
 run "Layer 7: generated.at freshness on edit (warn-only)" \
-  "$PY" "$SCRIPTS/check_generated_at.py" "$ROOT"
+  "$PY" "$SCRIPTS/check_generated_at.py" "${GEN_AT_ARGS[@]}"
 echo
 
 if [[ $status -ne 0 ]]; then

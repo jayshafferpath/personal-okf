@@ -368,7 +368,12 @@ class TestGeneratedAtFreshnessOnEdit(unittest.TestCase):
           "owners: [t]\ntags: [a]\n"
           "generated: {{ by: {actor}, at: 2026-01-01T00:00:00Z }}\n")
 
-    def _repo(self, actor: str = "human:x") -> Path:
+    DEFAULT_AT = "2026-01-01T00:00:00Z"
+
+    def _fm(self, actor: str = "human:x", at: str = DEFAULT_AT) -> str:
+        return self.FM.format(actor=actor).replace(self.DEFAULT_AT, at)
+
+    def _repo(self, actor: str = "human:x", at: str = DEFAULT_AT) -> Path:
         import subprocess
 
         def run(*args):
@@ -381,7 +386,7 @@ class TestGeneratedAtFreshnessOnEdit(unittest.TestCase):
         run("git", "config", "user.email", "t@t.com")
         run("git", "config", "user.name", "t")
         (d / "doc.md").write_text(
-            f"---\n{self.FM.format(actor=actor)}---\nOriginal body.\n",
+            f"---\n{self._fm(actor, at)}---\nOriginal body.\n",
             encoding="utf-8")
         run("git", "add", "doc.md")
         run("git", "commit", "-q", "-m", "initial")
@@ -435,6 +440,36 @@ class TestGeneratedAtFreshnessOnEdit(unittest.TestCase):
             "Changed body.\n", encoding="utf-8")
         self.assertIsNone(check_generated_at.check_file(d / "doc.md", d),
                           "process:-generated docs are exempt")
+
+    def test_same_day_reedit_of_bare_date_stamp_is_silent(self):
+        # A bare-date stamp can't move within its own day, so a second edit
+        # on the commit day has no fix to apply — warning would loop the
+        # Stop hook forever.
+        d = self._repo(at="2026-08-13")
+        (d / "doc.md").write_text(
+            f"---\n{self._fm(at='2026-08-13')}---\nChanged body.\n",
+            encoding="utf-8")
+        self.assertIsNone(
+            check_generated_at.check_file(d / "doc.md", d, today=date(2026, 8, 13)),
+            "a stamp already dated today is current")
+
+    def test_same_day_reedit_of_datetime_stamp_is_silent(self):
+        d = self._repo(at="2026-08-13T10:00:00Z")
+        (d / "doc.md").write_text(
+            f"---\n{self._fm(at='2026-08-13T10:00:00Z')}---\nChanged body.\n",
+            encoding="utf-8")
+        self.assertIsNone(
+            check_generated_at.check_file(d / "doc.md", d, today=date(2026, 8, 13)),
+            "the date part of a datetime stamp is what counts")
+
+    def test_stamp_from_yesterday_still_warns(self):
+        d = self._repo(at="2026-08-13")
+        (d / "doc.md").write_text(
+            f"---\n{self._fm(at='2026-08-13')}---\nChanged body.\n",
+            encoding="utf-8")
+        self.assertIsNotNone(
+            check_generated_at.check_file(d / "doc.md", d, today=date(2026, 8, 14)),
+            "the same-day exemption must not swallow genuinely stale stamps")
 
     def test_no_git_repo_does_not_crash(self):
         # Outside any git repo (or before the first commit), there is no
