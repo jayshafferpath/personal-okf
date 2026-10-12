@@ -1,0 +1,6 @@
+# Dependencies for the verify suite (scripts/verify.sh).
+#
+# OKF 0.2's `generated` / `verified` / `sources` families are nested mappings,
+# which need a real YAML parser rather than a hand-rolled subset. See
+# scripts/okf_frontmatter.py for the full rationale.
+PyYAML>=6.0,<7
