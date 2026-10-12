@@ -15,7 +15,7 @@ generated:
 Jira is Jay's personal work tracker, not only a team ticketing system.
 
 - **Todo backend:** personal todos are Jira issues in [JT](../pointers/jira-jt.md). commandcenter's Todos column is a front end over them, and there is no separate todo store.
-- **Tracker for work outside pathccm:** side projects and experiments under jayshafferpath (see [projects](../projects/index.md)) are tracked in Jira as well, even though their code doesn't live in the pathccm org. Their tickets are what commandcenter's agents pick up and work.
+- **Tracker for work outside pathccm:** side projects and experiments under jayshafferpath (see [projects](../projects/index.md)) are tracked in JT as well, even though their code doesn't live in the pathccm org. Their tickets are what commandcenter's agents pick up and work.
 
 ## Access paths
 

@@ -2,7 +2,7 @@
 type: pointer
 id: jira-jt
 title: JT Jira project ("Jays TODO")
-description: Personal todo project on rula.atlassian.net that commandcenter reads and writes.
+description: Jay's personal Jira project on rula.atlassian.net. It holds todos and the tickets for jayshafferpath work outside the pathccm org; commandcenter reads and writes it.
 owners: [human:jay.shaffer]
 tags: [jira, todos, commandcenter]
 resource: https://rula.atlassian.net/jira/core/projects/JT
@@ -24,6 +24,8 @@ Individual issues are not mirrored here because they change daily. Query them li
 
 The Todos column creates and completes JT issues. It uses `TODO_PROJECT_KEY` (default `JT`), `TODO_ISSUE_TYPE` (default `Task`) and `TODO_LABEL` (default `Todo`). See [commandcenter](../projects/commandcenter.md).
 
-JT is only the todo store. Agent-dispatchable work (`ClaudeWork`) can live in any project assigned to Jay. See [claude-lifecycle-labels](../concepts/claude-lifecycle-labels.md).
+## What else lives here
+
+JT also holds the tickets for jayshafferpath projects and experiments outside the pathccm org. No label or component separates them from todos yet. Anything carrying the `Todo` label appears in the todo query and the Todos column, whatever it is. Agent-dispatchable work (`ClaudeWork`) can be in JT or in any other project assigned to Jay. See [claude-lifecycle-labels](../concepts/claude-lifecycle-labels.md).
 
 Several early issues (JT-2, JT-3, JT-11 to JT-13) are demo or smoke-test todos, not real work.
